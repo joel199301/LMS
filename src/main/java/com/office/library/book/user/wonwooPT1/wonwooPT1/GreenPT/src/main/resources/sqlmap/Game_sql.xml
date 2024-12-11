@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="game">
+	<insert id="insertGame"
+		parameterType="com.office.green.games.GameVo">
+		insert into gp_game_list(
+		g_g_name,
+		g_thumbnail1,
+		g_thumbnail2,
+		g_thumbnail3,
+		g_thumbnail4,
+		g_thumbnail5,
+		g_link,
+		g_g_company,
+		g_content,
+
+		g_g_reg_date,
+		g_g_mod_date
+		)
+		values(
+		#{g_g_name},
+		#{g_thumbnail1},
+		#{g_thumbnail2},
+		#{g_thumbnail3},
+		#{g_thumbnail4},
+		#{g_thumbnail5},
+		#{g_link},
+		#{g_g_company},
+		#{g_content},
+
+		now(),
+		now()
+		)
+	</insert>
+
+	<select id="home" resultType="map">
+		select * from gp_game_list
+		Order By
+		g_g_no DESC
+	</select>
+
+	<select id="downNo" parameterType="map" resultType="int">
+		select * 
+			from gp_download_list gdl join gp_admin_member adm on gdl.g_m_no = adm.g_m_no 
+		where adm.g_m_no = #{g_m_no} and gdl.g_g_no = #{g_g_no}
+	</select>
+
+	<select id="rcount" resultType="int">
+		select (select count(*) from
+		gp_game_board where g_g_no = gl.g_g_no) AS replyCnt
+		from gp_game_list
+		gl
+		where gl.g_g_no = #{g_g_no}
+		;
+	</select>
+
+	<select id="details" parameterType="String" resultType="GameVo">
+		select *
+		from gp_game_list where g_g_no = #{g_g_no}
+	</select>
+
+	<select id="boardDetail" parameterType="String"
+		resultType="com.office.green.BoardVo">
+		select *
+		from Game_BOARD_list
+		where fB_no = #{fB_no}
+	</select>
+
+	<select id="searchKeyword" parameterType="String"
+		resultType="map">
+		select * from gp_game_list where g_g_name like
+		CONCAT('%',#{g_g_name},'%')
+	</select>
+
+	<update id="downLoad" parameterType="int">
+		update gp_game_list
+		set
+		g_download_able = 0
+		where g_g_no = #{g_g_no}
+	</update>
+
+	<select id="topgame" resultType="map">
+		select
+		gg.g_g_no,
+		gg.g_g_name,
+		gg.g_thumbnail1, gg.g_g_company,
+		DENSE_RANK() OVER(ORDER BY
+		count(gg.g_g_no) DESC) AS rnk
+		from gp_download_list gd join
+		gp_game_list gg on gd.g_g_no = gg.g_g_no
+		group by gg.g_g_no,
+		gg.g_g_name, gg.g_thumbnail1, gg.g_g_company
+		;
+	</select>
+
+	<insert id="postWrite" parameterType="com.office.green.WriteVo">
+		insert into gp_game_board(
+		g_g_no,
+		b_content,
+		g_m_name,
+		b_reg_date
+
+		)
+		values(
+		#{g_g_no},
+		#{b_content},
+		#{g_m_name},
+		now()
+		)
+	</insert>
+
+	<select id="reply" resultType="map">
+		select *
+		from gp_game_board
+		where
+		g_g_no = #{g_g_no}
+	</select>
+
+
+</mapper>
+  

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="admin">
+	<insert id="createAdmin"
+		parameterType="com.office.green.admin.AdminVo">
+		insert into gp_admin_member(
+		g_m_mail,
+		g_m_pw,
+		g_m_name,
+		g_m_gender,
+		g_m_phone,
+		g_m_thumbnail,
+		g_m_reg_date,
+		g_m_mod_date
+		<if test="g_m_name=='Super admin'">
+			,g_m_approval
+		</if>
+		)
+		values(
+		#{g_m_mail},
+		#{g_m_pw},
+		#{g_m_name},
+		#{g_m_gender},
+		#{g_m_phone},
+		#{g_m_thumbnail},
+		now(),
+		now()
+		<if test="g_m_name=='Super admin'">
+			,1
+		</if>
+		)
+	</insert>
+
+	<select id="adminselect"
+		parameterType="com.office.green.admin.AdminVo"
+		resultType="com.office.green.admin.AdminVo">
+		select * from
+		gp_admin_member where g_m_mail = #{g_m_mail}
+		and g_m_approval > 0
+	</select>
+
+	<select id="adminProfile" parameterType="String"
+		resultType="com.office.green.admin.AdminVo">
+		select * from
+		gp_admin_member where g_m_mail = #{g_m_mail}
+		and g_m_approval > 0
+	</select>
+
+	<select id="reqID" resultType="map">
+		select * from gp_admin_member
+		where g_m_approval = 0
+		Order By g_m_no DESC
+	</select>
+
+	<update id="approve" parameterType="int">
+		update gp_admin_member set
+		g_m_approval = 1 where g_m_no = #{g_m_no}
+	</update>
+
+	<select id="downGame" parameterType="int" resultType="map">
+		select *
+		from gp_download_list gd
+		join gp_game_list gg on gd.g_g_no = gg.g_g_no
+		join gp_admin_member ga on ga.g_m_no = gd.g_m_no
+		where ga.g_m_no =
+		#{g_m_no}
+	</select>
+
+	<!-- 계정정보수정 -->
+	<update id="modifyAdminConfirm" parameterType="map">
+		update
+		gp_admin_member
+		set
+		g_m_name = #{g_m_name}
+		, g_m_pw = #{g_m_pw}
+		, g_m_gender = #{g_m_gender}
+		, g_m_phone = #{g_m_phone}
+		where g_m_no = #{g_m_no}
+	</update>
+
+	<!-- 게시판 목록 -->
+	<select id="boardlist" resultType="map">
+		select * from Game_BOARD_list
+		Order By
+		FB_no DESC
+	</select>
+
+	<select id="selectName" parameterType="String"
+		resultType="com.office.green.admin.AdminVo">
+		select *
+		from gp_admin_member where g_g_no = #{g_g_no}
+	</select>
+
+
+	<insert id="boardinsert"
+		parameterType="com.office.green.BoardVo">
+		insert into Game_BOARD_list(
+		FB_Title,
+		FB_Content,
+		g_m_name,
+		FB_reg_date,
+		FB_CNT
+
+		)
+		values(
+		#{FB_Title},
+		#{FB_Content},
+		#{g_m_name},
+		now(),
+		#{FB_CNT}
+		)
+	</insert>
+
+
+
+</mapper>
+  
